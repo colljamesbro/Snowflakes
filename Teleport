@@ -2,28 +2,43 @@
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local UserInputService = game:GetService("UserInputService")
 
--- Teleport Function
-local function teleportToSnowflakes()
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and obj.Name == "Snowflake" then
-            -- Teleport the character to the snowflake
-            if Character:FindFirstChild("HumanoidRootPart") then
-                Character.HumanoidRootPart.CFrame = obj.CFrame
-                wait(1) -- Delay to prevent instant re-teleports
-            end
-        end
+-- Variables
+local spawnPoint = nil
+
+-- Function to set spawn point
+local function setSpawnPoint()
+    if Character:FindFirstChild("HumanoidRootPart") then
+        spawnPoint = Character.HumanoidRootPart.Position
+        print("Spawn point set at: " .. tostring(spawnPoint))
+    else
+        warn("HumanoidRootPart not found!")
     end
 end
 
--- Keybind to Activate the Script
-local UserInputService = game:GetService("UserInputService")
+-- Function to teleport to spawn point on respawn
+local function onRespawn()
+    if spawnPoint then
+        Character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(spawnPoint)
+        print("Teleported to spawn point: " .. tostring(spawnPoint))
+    else
+        warn("No spawn point set!")
+    end
+end
 
+-- Keybind to set spawn point
 UserInputService.InputBegan:Connect(function(input, isProcessed)
     if isProcessed then return end
-    if input.KeyCode == Enum.KeyCode.T then -- Press "T" to teleport
-        teleportToSnowflakes()
+    if input.KeyCode == Enum.KeyCode.LeftControl then -- Press Ctrl to set spawn point
+        setSpawnPoint()
     end
 end)
 
-print("Press 'T' to teleport to snowflakes!")
+-- Listen for character respawn
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    Character = newCharacter
+    onRespawn()
+end)
+
+print("Press 'Ctrl' to set your spawn point!")
