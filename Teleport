@@ -1,0 +1,29 @@
+-- Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+-- Teleport Function
+local function teleportToSnowflakes()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.Name == "Snowflake" then
+            -- Teleport the character to the snowflake
+            if Character:FindFirstChild("HumanoidRootPart") then
+                Character.HumanoidRootPart.CFrame = obj.CFrame
+                wait(1) -- Delay to prevent instant re-teleports
+            end
+        end
+    end
+end
+
+-- Keybind to Activate the Script
+local UserInputService = game:GetService("UserInputService")
+
+UserInputService.InputBegan:Connect(function(input, isProcessed)
+    if isProcessed then return end
+    if input.KeyCode == Enum.KeyCode.T then -- Press "T" to teleport
+        teleportToSnowflakes()
+    end
+end)
+
+print("Press 'T' to teleport to snowflakes!")
