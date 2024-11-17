@@ -1,44 +1,45 @@
 -- Services
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local UserInputService = game:GetService("UserInputService")
 
 -- Variables
 local spawnPoint = nil
 
--- Function to set spawn point
+-- Function to Set Spawn Point
 local function setSpawnPoint()
-    if Character:FindFirstChild("HumanoidRootPart") then
-        spawnPoint = Character.HumanoidRootPart.Position
+    if Character and Character:FindFirstChild("HumanoidRootPart") then
+        spawnPoint = Character.HumanoidRootPart.CFrame
         print("Spawn point set at: " .. tostring(spawnPoint))
     else
-        warn("HumanoidRootPart not found!")
+        warn("HumanoidRootPart not found! Ensure your character is loaded.")
     end
 end
 
--- Function to teleport to spawn point on respawn
-local function onRespawn()
-    if spawnPoint then
-        Character:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(spawnPoint)
-        print("Teleported to spawn point: " .. tostring(spawnPoint))
+-- Function to Teleport to Spawn Point on Respawn
+local function teleportToSpawnPoint()
+    if spawnPoint and Character:FindFirstChild("HumanoidRootPart") then
+        Character:WaitForChild("HumanoidRootPart").CFrame = spawnPoint
+        print("Teleported to saved spawn point!")
     else
-        warn("No spawn point set!")
+        warn("No spawn point set or character not ready!")
     end
 end
 
--- Keybind to set spawn point
+-- Handle Key Input to Set Spawn Point
 UserInputService.InputBegan:Connect(function(input, isProcessed)
     if isProcessed then return end
-    if input.KeyCode == Enum.KeyCode.LeftControl then -- Press Ctrl to set spawn point
+    if input.KeyCode == Enum.KeyCode.LeftControl then -- Press Ctrl
         setSpawnPoint()
     end
 end)
 
--- Listen for character respawn
+-- Handle Respawn and Teleport
 LocalPlayer.CharacterAdded:Connect(function(newCharacter)
     Character = newCharacter
-    onRespawn()
+    Character:WaitForChild("HumanoidRootPart") -- Wait for character to load
+    teleportToSpawnPoint()
 end)
 
 print("Press 'Ctrl' to set your spawn point!")
